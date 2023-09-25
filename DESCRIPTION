@@ -1,11 +1,10 @@
 Package: INLAcomp
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Logistic-normal Dirichlet Model for Compositional Data
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Joaquín Martínez-Minaya <jmarmin@eio.upv.es>
+Maintainer: Joaquín Martínez-Minaya <jmarmin@eio.upv.es>
+Description: This package has the necessary functions to compute the DIC and WAIC for LNDMs using R-INLA
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
@@ -16,3 +15,7 @@ Suggests:
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
+Imports: 
+    dplyr,
+    Matrix,
+    stringr
