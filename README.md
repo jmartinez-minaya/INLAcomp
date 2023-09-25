@@ -18,4 +18,5 @@ Installation
 
 It is not yet in CRAN, but you can install the latest bugfix release of **INLAcomp** from [github](https://github.com/jmartinez-minaya/INLAcomp) with:
 
+`r remotes::install_github("https://github.com/jmartinez-minaya/INLAcomp")`
 
