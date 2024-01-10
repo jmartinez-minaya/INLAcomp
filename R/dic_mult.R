@@ -76,7 +76,7 @@ extract_lp_sigma <- function(xx){
 dic.mult <- function(inf, y){
   nsim <- length(inf)
   #Expected deviance
-  e.dev <- mclapply(inf,
+  e.dev <- parallel::mclapply(inf,
                     function(x){
                       a <- -2*dmnorm(mu = x$predictor,
                                      Sigma = x$Sigma,

@@ -352,12 +352,38 @@ display: none;
 </div>
 
 
-<div id="inlacomp" class="section level1">
-<h1>INLAcomp</h1>
+<div id="inlacomp" class="section level2">
+<h2>INLAcomp</h2>
 <p>The goal of <strong>INLAcomp</strong> is to analyze compositional
 data with Logistic Normal distribution regression with Dirichlet
-residuals using the integrated nested Laplace approximation via the <a href="https://www.r-inla.org/">R-INLA package</a>.</p>
-<p>UNDER CONSTRUCTION</p>
+residuals (LNDM) using the integrated nested Laplace approximation via
+the <a href="https://www.r-inla.org/">R-INLA package</a>. Method is in
+<a href="https://arxiv.org/abs/2308.13928">Martinez-Minaya and Rue,
+2023</a>.</p>
+<ul>
+<li><p>For a <strong>tutorial about how to fit a simple LNDM model using
+R-INLA</strong>, click <a href="https://github.com/jmartinez-minaya/INLAcomp/blob/main/vignettes/Dirichlet-CoDa.Rmd">here</a>
+or <a href="https://github.com/hrue/r-inla/commit/3577c1b030a8460ff7194893bd97e57a62a1399d">here</a></p></li>
+<li><p>The code for the paper is available in the <a href="https://github.com/jmartinez-minaya/INLAcomp/blob/main/vignettes/my-vignette.Rmd">vignette</a>.
+The generated html is available <a href="https://jmartinez-minaya.github.io/supplementary/INLAComp/my-vignette.html">here</a></p></li>
+</ul>
+</div>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>It is not yet in CRAN, but you can install the latest bugfix release
+of dirinla from <a href="https://github.com/inlabru-org/dirinla">github</a> with:</p>
+<p><code>{r, eval=FALSE} # install.packages(&quot;remotes&quot;) remotes::install_github(&quot;inlabru-org/dirinla&quot;, ref = &quot;master&quot;)</code></p>
+<p>The latest development version can be installed via <a href="https://inlabru-org.r-universe.dev/ui#builds">inlabru-org.r-universe.dev</a>:
+```{r universe-installation, eval = FALSE} # Enable universe(s) by
+inlabru-org options(repos = c( inlabruorg = ‘<a href="https://inlabru-org.r-universe.dev" class="uri">https://inlabru-org.r-universe.dev</a>’, INLA = ‘<a href="https://inla.r-inla-download.org/R/testing" class="uri">https://inla.r-inla-download.org/R/testing</a>’, CRAN = ‘<a href="https://cloud.r-project.org" class="uri">https://cloud.r-project.org</a>’))</p>
+</div>
+<div id="install-the-package" class="section level1">
+<h1>Install the package</h1>
+<p>install.packages(‘dirinla’)</p>
+<pre><code>or directly from github:
+```{r, eval=FALSE}
+# install.packages(&quot;remotes&quot;)
+remotes::install_github(&quot;inlabru-org/dirinla&quot;, ref = &quot;devel&quot;)</code></pre>
 </div>
 
 
