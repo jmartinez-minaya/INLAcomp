@@ -7,7 +7,9 @@ via the [R-INLA package](https://www.r-inla.org/). Method is in [Martinez-Minaya
 
 - For a **tutorial about how to fit a simple LNDM model using R-INLA**, click [here](https://github.com/jmartinez-minaya/INLAcomp/blob/main/vignettes/Dirichlet-CoDa.Rmd) or [here](https://github.com/hrue/r-inla/commit/3577c1b030a8460ff7194893bd97e57a62a1399d)
 
-- The code for the paper is available in the [vignette](https://github.com/jmartinez-minaya/INLAcomp/blob/main/vignettes/my-vignette.Rmd). The generated html is available [here](https://jmartinez-minaya.github.io/supplementary/INLAComp/my-vignette.html)
+- The Spatial LNDM simulation conducted in the paper is available [here](https://github.com/jmartinez-minaya/INLAcomp/tree/main/simulations). The generated html is availabe [here](https://jmartinez-minaya.github.io/supplementary/INLAComp/simulations.html)
+
+- The code for the Real example depicted in the paper is available in the [vignette](https://github.com/jmartinez-minaya/INLAcomp/blob/main/vignettes/my-vignette.Rmd). The generated html is available [here](https://jmartinez-minaya.github.io/supplementary/INLAComp/my-vignette.html)
 
 
 
