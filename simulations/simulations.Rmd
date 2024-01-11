@@ -38,6 +38,7 @@ library(INLA)
 library(raster)
 library(inlabru)
 library(parallel)
+library(gridExtra)
 ```
 # Functions for plotting
 ```{r}
@@ -129,10 +130,10 @@ plot_raster <- function(rast, cat, names,
   sp_eus2 <- fortify(poly)
   rast_gc1 <- as(rast[[cat]], "SpatialPixelsDataFrame")
   rast_gc1 <- as.data.frame(rast_gc1)
-  colnames(rast_gc1) <- c("value", "x", "y")
+  colnames(rast_gc1) <- c("value", "lon", "lat")
 
   gc1_pred <- ggplot() +
-    geom_tile(data = rast_gc1, aes(x = x, y = y, fill = value)) +
+    geom_tile(data = rast_gc1, aes(x = lon, y = lat, fill = value)) +
     # geom_polygon(data = poly, aes(x = long, y = lat, group = group),
     #              fill = NA, color = "gray20", size = 0.25) +
     coord_equal(ratio = 1) +
@@ -221,8 +222,8 @@ Generating a couple of samples from the model:
 ```{r }
 true_field <- inla.qsample(D-1, true_Q, seed = inla.seed)
 truth <- expand.grid(
-  x = seq(0, 10, length = 500),
-  y = seq(0, 10, length = 500))
+  lon = seq(0, 10, length = 500),
+  lat = seq(0, 10, length = 500))
 raster_predict <- rasterFromXYZ(truth)
 raster_predict[!is.na(raster_predict)] <- 0
 
@@ -232,15 +233,15 @@ truth <- fm_evaluate(
   loc = as.matrix(truth),
   field = true_field
 ) %>% cbind(truth, .)
-names(truth) <- c("x", "y", paste0("field", 1:(D-1)))
+names(truth) <- c("lon", "lat", paste0("field", 1:(D-1)))
 
-coordinates(truth) <- c("x", "y")
+coordinates(truth) <- c("lon", "lat")
 truth <- as(truth, "SpatialPixelsDataFrame")
 
 plot_truth <- lapply(1:(D-1), function(dd){
   csc1 <- colsc(truth[[dd]])
   ggplot() +
-    gg(truth, mapping = aes_string("x", "y", fill = paste0("field", dd))) +
+    gg(truth, mapping = aes_string("lon", "lat", fill = paste0("field", dd))) +
     coord_equal() +
     ggtitle(paste0("True field ", dd)) + csc1
 })
@@ -264,8 +265,8 @@ D <- k <- D
 sigma2 <- runif( D-1, 0.2, 0.6) %>% round(., 2)
 cov_param <- 0.1
 
-data <- data.frame(x = runif(N, 0, 10),
-                   y = runif(N, 0, 10))
+data <- data.frame(lon = runif(N, 0, 10),
+                   lat = runif(N, 0, 10))
 
 sigma_diag <- sqrt(sigma2 + cov_param)
 
@@ -314,18 +315,18 @@ lin.pred %>%
     MASS::mvrnorm( n  = 1,
                    mu = z,
                    Sigma = Sigma)) %>%
-  t(.)-> alryy
-colnames(alryy) <- paste0("alr.yy", (1:(D-1)))
+  t(.)-> alry
+colnames(alry) <- paste0("alr.y", (1:(D-1)))
 ```   
 
 ## Data in the simplex
 We move back to the Simplex using the $alr$-inverse, in particular, we use the function `alrInv` form the R-package `compositions`.
 
 ```{r}
-yy.simplex <- compositions::alrInv(alryy)
-yy.simplex <- as.numeric(t(yy.simplex)) %>% matrix(., ncol = D, byrow = TRUE)
-colnames(yy.simplex) <- paste0("yy", 1:D)
-data <- cbind(data, alryy, yy.simplex)
+y.simplex <- compositions::alrInv(alry)
+y.simplex <- as.numeric(t(y.simplex)) %>% matrix(., ncol = D, byrow = TRUE)
+colnames(y.simplex) <- paste0("y", 1:D)
+data <- cbind(data, alry, y.simplex)
 data %>% head(.)
 ```
 
@@ -333,16 +334,17 @@ data %>% head(.)
 ```{r}
 bound <- fortify(bnd)
 data_plot <- data %>%
-  dplyr::select(all_of(c("x", "y", paste0("yy", 1:D)))) %>%
-  tidyr::pivot_longer(all_of(paste0("yy", 1:D)))
+  dplyr::select(all_of(c("lon", "lat", paste0("y", 1:D)))) %>%
+  tidyr::pivot_longer(all_of(paste0("y", 1:D)))
+
 
 p1 <- ggplot() +
   geom_polygon(data = bound, aes(x = long,
                                  y = lat),
                colour = 'gray70', fill = 'gray90') +
   geom_point(data = data_plot,
-             aes(x = x,
-                 y = y,
+             aes(x = lon,
+                 y = lat,
                  #size = value,
                  color = value),
              alpha = 0.8, size = 3) +
@@ -364,15 +366,18 @@ p1 <- ggplot() +
   ylab("") +
   scale_color_viridis(option="magma", direction = -1, limits = c(0, 1),
                       name = "")
+getwd()
 
+#pdf("simulation_data.pdf", width = 10, height = 5)
 print(p1)
+#dev.off()
 ```
 
 ## Plotting the alr-coordiantes
 ```{r}
  data_plot_alr <- data %>%
-    dplyr::select(all_of(c("x", "y", paste0("alr.yy", 1:(D-1))))) %>%
-    tidyr::pivot_longer(all_of(paste0("alr.yy", 1:(D-1))))
+    dplyr::select(all_of(c("lon", "lat", paste0("alr.y", 1:(D-1))))) %>%
+    tidyr::pivot_longer(all_of(paste0("alr.y", 1:(D-1))))
 
 
   #Plotting the map
@@ -381,8 +386,8 @@ print(p1)
                                    y = lat),
                  colour = 'gray70', fill = 'gray90') +
     geom_point(data = data_plot_alr,
-               aes(x = x,
-                   y = y,
+               aes(x = lon,
+                   y = lat,
                    #size = value,
                    color = value),
                alpha = 0.8, size = 3) +
@@ -404,8 +409,9 @@ print(p1)
     ylab("") +
     scale_color_viridis(option="magma", direction = -1,
                         name = "")
-
+#pdf("simulation_data_alr.pdf", width = 9, height = 5)
   print(p2)
+#dev.off()
 ```
 
 
@@ -413,13 +419,13 @@ print(p1)
 
 ## Defining a new column with the values of all `alr` coordinates
 ```{r}
-names_gc <- paste0("yy", 1:(D-1))
+names_gc <- paste0("y", 1:(D-1))
 data_ext <- data %>%
   tidyr::pivot_longer(., cols = all_of(paste0("alr.", names_gc)),
                       names_to  = "alr_gc",
                       values_to = "val_alr_gc") %>%
   .[order(ordered(.$alr_gc)),]
-head(data_ext[, c("x", "y", "alr_gc", "val_alr_gc")])
+head(data_ext[, c("lon", "lat", "alr_gc", "val_alr_gc")])
 ```
 
 
@@ -445,7 +451,7 @@ ggplot() +
   gg(mesh) +
   coord_equal() +
   geom_point(data = data,
-             aes(x = x, y = y))
+             aes(x = lon, y = lat))
 ```
 
 ## Defining the spde {.tabset} 
@@ -488,7 +494,7 @@ colnames(iset2) <- paste0("iset.alr", 1:(k-1))
 ### Defining the projection matrix
 ```{r}
 A.est <- inla.spde.make.A(mesh  = mesh,
-                          loc   = cbind(data_ext$x, data_ext$y),
+                          loc   = cbind(data_ext$lon, data_ext$lat),
                           repl  = k.repl)
 A.est2 <- A.est
 ```
@@ -862,10 +868,10 @@ measures <- lapply(model_list, function(mod1){
   inf <- parallel::mclapply(xx, INLAcomp::extract_lp_sigma)
   
   #DIC
-  dic.mod1 <- INLAcomp::dic.mult(inf, y = data[, c(paste0("alr.yy", 1:(k-1)))])
+  dic.mod1 <- INLAcomp::dic.mult(inf, y = data[, c(paste0("alr.y", 1:(k-1)))])
   
   #WAIc
-  waic.mod1 <- INLAcomp::waic.mult(inf, y = data[, c(paste0("alr.yy", 1:(k-1)))])
+  waic.mod1 <- INLAcomp::waic.mult(inf, y = data[, c(paste0("alr.y", 1:(k-1)))])
   
   #lIST FOR cpo
   friends_list <- 1:(N*(D-1)) %>%
@@ -996,7 +1002,9 @@ gridExtra::grid.arrange(gridExtra::arrangeGrob(p1.alr1.Real + theme(legend.posit
                         gridExtra::arrangeGrob(mylegend_alr2, nrow = 1, widths = c(4)),
                         nrow = 4, ncol = 1, heights = c(6, 1, 6, 1))
 
-png(paste0("spatial","_", N, ".png"), width = 1400, height = 1050, res = 150)
+#png(paste0("spatial","_", N, ".png"), width = 1400, height = 1050, res = 150)
+
+#pdf(paste0("spatial","_", N, ".pdf"), width = 14, height = 5)
 gridExtra::grid.arrange(arrangeGrob(p1.alr1.Real + theme(legend.position = "none"),
                                     p1.alr1.median + theme(legend.position = "none"),
                                     p1.alr1.025 + theme(legend.position = "none"),
@@ -1011,24 +1019,22 @@ gridExtra::grid.arrange(arrangeGrob(p1.alr1.Real + theme(legend.position = "none
                                     nrow = 1),
                         arrangeGrob(mylegend_alr2, nrow = 1, widths = c(4)),
                         nrow = 4, ncol = 1, heights = c(6, 1, 6, 1))
-dev.off()
+#dev.off()
 ```
 
 ## Recovering corresponding to the fixed effects
 ```{r, fig.asp=0.5}
 lapply(1:(D-1), function(xx){
-  data.frame(model$marginals.random$id.xx[[xx]],
-             alr = paste0("alr.y", xx),
+  data.frame(inla.smarginal(model$marginals.random$id.xx[[xx]]),
+             alr = paste0("(", xx, ")"),
              var = "beta1")
 }) %>% do.call(rbind.data.frame, .) -> data_fixed2
 #data_fixed <- rbind(data_fixed, data_fixed2)
 data_fixed <- data_fixed2
-data_fixed$alrvar = paste0(data_fixed$alr, "-", data_fixed$var)
-
+data_fixed$alrvar = data_fixed$alr
 
 fixed.real <- data.frame(real = c(as.numeric((betas))),
-                         alrvar = c(#paste0("alr.y", 1:(D-1), "-beta0"),
-                                    paste0("alr.y", 1:(D-1), "-beta1")))
+                         alrvar = c(                          paste0("(", 1:(D-1), ")")))
 
 
 
@@ -1037,13 +1043,15 @@ p.fixed <- ggplot() +
   geom_vline(data = fixed.real, aes(xintercept = real), col = "red4") +
   theme_bw() +
   theme(legend.position = "bottom") +
-  facet_wrap(~ alrvar, nrow = 1, scales = "free") +
+  facet_wrap(~ alrvar, nrow = 1, scales = "free",
+               labeller = label_bquote(beta [1] ^ .(alrvar))) +
   xlab(expression(beta^(d))) +
   ylab(expression(p(beta^(d) *'|'* theta))) +
   theme(legend.title = element_blank())
 
+#pdf("posterior_fixed.pdf", width = 6, height = 5)
 print(p.fixed)
-
+#dev.off()
 
 
 ```
@@ -1074,23 +1082,38 @@ hyper.df <- lapply(1:length(hyper),
 hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c(paste0("sigma2.", 1:(D-1)),
                                      "gamma", "phi", "sigma.sp"))
+#hyper.df$name1 <- as.character(hyper.df$name1)
 
-hyper.df$name1 <- as.character(hyper.df$name1)
+
+hyper.df$name1 <- ordered(hyper.df$name1,
+                          levels = c("sigma2.1", "sigma2.2",
+                                     "gamma", "phi", "sigma.sp"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "gamma", "phi", "sigma[w]"))
+
 
 hyper.real <- data.frame(real = c(sigma2, cov_param, true_range, true_sigma),
                          name1 = c(paste0("sigma2.", 1:(D-1)),
                                    "gamma", "phi", "sigma.sp"))
 
+hyper.real$name1 <- as.factor(hyper.real$name1)
+hyper.real$name1 <- ordered(hyper.real$name1,
+                          levels = c("sigma2.1", "sigma2.2",
+                                     "gamma", "phi", "sigma.sp"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "gamma", "phi", "sigma[w]"))
+
+
+
 p.hyper <- ggplot(hyper.df) +
-  geom_line(aes(x = x, y = y), size = 0.9) +
+  geom_line(aes(x = x, y = y)) +
   geom_vline(data = hyper.real, aes(xintercept = real), col = "red4") +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free", 
+             labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
 
-
+#pdf("simulation_data_hyperpar.pdf", width = 9, height = 5)
 print(p.hyper)
-
+#dev.off()
   
 ```
