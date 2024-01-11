@@ -157,7 +157,7 @@ We move back to the Simplex using the $alr$-inverse, in particular, we use the f
   y.simplex <- as.numeric(t(y.simplex)) %>% matrix(., ncol = D, byrow = TRUE)
   colnames(y.simplex) <- paste0("y", 1:D)  
   data <- data.frame(alry, y.simplex, x)
-colnames(data)[1:(D-1)] <- c(paste0("alry.", 1:(D-1)))
+colnames(data)[1:(D-1)] <- c(paste0("alr.y", 1:(D-1)))
 data %>% head(.)
 ```
 
@@ -203,7 +203,7 @@ grid.arrange(arrangeGrob(p_y,
 We extent the data with $alr$-coordinates for introducing in `inla.stack`
 ```{r}
 data_ext <- data %>%
-  tidyr::pivot_longer(., cols = all_of(paste0("alry.", 1:(D-1))),
+  tidyr::pivot_longer(., cols = all_of(paste0("alr.y", 1:(D-1))),
                       names_to  = "y.names",
                       values_to = "y.resp") %>%
   .[order(ordered(.$y.names)),]
@@ -217,7 +217,7 @@ We create a matrix with dimension $(N \times (D-1)) \times (D-1)$ for including 
 
 
 ```{r}
-names_y <- paste0("alry.", 1:(D-1))
+names_y <- paste0("alr.y", 1:(D-1))
 
 
 1:length(names_y) %>%
@@ -323,25 +323,26 @@ model.typeII <- inla(formula.typeII,
 ```{r}
 ### Posterior distribution of the fixed effects
 data_fixed <- rbind(data.frame(inla.smarginal(model.typeII$marginals.random$id.x$index.1),
-                               alr = "alr(y1/y3)",
+                               alr = "(1)",
                                var = "x",
-                               param = "beta1",
+                               param = "1",
                                real  = betas[1,2]),
                     data.frame(inla.smarginal(model.typeII$marginals.random$id.x$index.2),
-                               alr = "alr(y2/y3)",
+                               alr = "(2)",
                                var = "x",
-                               param = "beta1",
+                               param = "1",
                                real  = betas[2,2]),
                     data.frame(inla.smarginal(model.typeII$marginals.random$id.intercept$index.1),
-                               alr = "alr(y1/y3)",
+                               alr = "(1)",
                                var = "intercept",
-                               param = "beta0",
+                               param = "0",
                                real = betas[1,1]),
                     data.frame(inla.smarginal(model.typeII$marginals.random$id.intercept$index.2),
-                               alr = "alr(y2/y3)",
+                               alr = "(2)",
                                var = "intercept",
-                               param = "beta0",
+                               param = "0",
                                real = betas[2,1]))
+
 
 p_fixed <- ggplot() +
   geom_line(data = data_fixed, aes(x = x, y = y), size = 0.9) +
@@ -350,7 +351,10 @@ p_fixed <- ggplot() +
   geom_vline(data = data_fixed, aes(xintercept = real), col = "red4") +
  # scale_color_manual(values=c("#E75F00", "#56B4E9"))+
   theme(legend.position = "bottom") +
-  facet_wrap(~param + alr, ncol = D-1, scales = "free") +
+  facet_wrap(~param + alr, 
+             ncol = D-1, 
+             scales = "free",
+  labeller = label_bquote(beta [ .(param)] ^ .(alr))) +
   xlab(expression(beta^(d))) +
   ylab(expression(p(beta^(d) *'|'* theta))) +
   theme(legend.title = element_blank())
@@ -376,6 +380,8 @@ hyper <- lapply(1:length(prec),
                 })
 names(hyper) <- names(prec)
 
+
+
 hyper.df <- lapply(1:length(hyper),
                    function(x){
                      cbind(data.frame(hyper[[x]]), name1 = names(hyper)[x])
@@ -384,19 +390,24 @@ hyper.df <- lapply(1:length(hyper),
 
 hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c("sigma2.1", "sigma2.2",
-                                     "gamma"))
+                                     "gamma"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "gamma"))
 
-
+hypers_lik$name1 <- ordered(hypers_lik$name1,
+                          levels = c("sigma2.1", "sigma2.2",
+                                     "gamma"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "gamma"))
 
 p.hyper <- ggplot(hyper.df) +
   geom_line(aes(x = x, y = y)) +
   geom_vline(data = hypers_lik, aes(xintercept = hypers), col = "red4") +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free",
+             labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
 
-#pdf("marginals_hyperpar.pdf", width = 6, height = 3)
+#pdf("marginals_hyperpar.pdf", width = 7, height = 3)
 print(p.hyper)
 #dev.off()
 
