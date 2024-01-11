@@ -25,6 +25,16 @@ knitr::opts_chunk$set(
 
 ```
 
+```{r}
+#Configuration for posterior sample
+#For replicating
+rm(list=ls())
+set.seed(201803)
+inla.seed = sample.int(n=1E6, size=1)
+options(width=70, digits=3)
+
+``` 
+
 This document has been created with the purpose of showing how one can fit an LNDR model when dealing with compositional data.
 
 ```{r setup, warning = FALSE, message=FALSE}
@@ -545,14 +555,12 @@ model.typeI <- inla(formula.typeI,
                    control.predictor = list(A = inla.stack.A(stk.est), 
                                             compute = TRUE),
                    control.family = list_prior,   
-                   inla.mode = "experimental" , 
                    verbose = FALSE)
 ```
 
 ### Posterior distribution of the fixed effects
 ```{r}
-data_fixed <- rbind(#data.frame(inla.smarginal(model.typeI$marginals.fixed$intercept), var = "Intercept"),
-                    data.frame(inla.smarginal(model.typeI$marginals.fixed$sc_bio1), var = "BIO1"),
+data_fixed <- rbind(data.frame(inla.smarginal(model.typeI$marginals.fixed$sc_bio1), var = "BIO1"),
                     data.frame(inla.smarginal(model.typeI$marginals.fixed$sc_bio12), var = "BIO12"))
 
 p_fixed <- ggplot() +
@@ -643,24 +651,23 @@ model.typeII <- inla(formula.typeII,
                    control.predictor = list(A = inla.stack.A(stk.est), 
                                             compute = TRUE),
                    control.family = list_prior,   
-                   inla.mode = "experimental" , 
                    verbose = FALSE)
 
 ```
 
 ### Posterior distribution of the fixed effects
 ```{r, fig.asp=0.5}
-data_fixed <- rbind(data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio1$index.1), alr = "alr(GC1/GC4)", 
+data_fixed <- rbind(data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio1$index.1), alr = "alr.gc1", 
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio1$index.2), alr = "alr(GC2/GC4)",
+                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio1$index.2), alr = "alr.gc2",
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio1$index.3), alr = "alr(GC3/GC4)",
+                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio1$index.3), alr = "alr.gc3",
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio12$index.1), alr = "alr(GC1/GC4)",
+                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio12$index.1), alr = "alr.gc1",
                                var = "BIO12"),
-                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio12$index.2), alr = "alr(GC2/GC4)",
+                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio12$index.2), alr = "alr.gc2",
                                var = "BIO12"),
-                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio12$index.3), alr = "alr(GC3/GC4)",
+                    data.frame(inla.smarginal(model.typeII$marginals.random$id.sc_bio12$index.3), alr = "alr.gc3",
                                var = "BIO12"))
 p_fixed <- ggplot() +
   geom_line(data = data_fixed, aes(x = x, y = y, col = var, linetype = var), size = 0.9) +
@@ -744,7 +751,6 @@ model.typeIII <- inla(formula.typeIII,
                    control.predictor = list(A = inla.stack.A(stk.est), 
                                             compute = TRUE),
                    control.family = list_prior,   
-                   inla.mode = "experimental" , 
                    verbose = FALSE)
 
 ```
@@ -877,7 +883,6 @@ model.typeIV <- inla(formula.typeIV,
                    control.predictor = list(A = inla.stack.A(stk.est), 
                                             compute = TRUE),
                    control.family = list_prior,   
-                   inla.mode = "experimental" , 
                    verbose = FALSE)
 
 
@@ -888,17 +893,17 @@ model.typeIV <- inla(formula.typeIV,
 ### Posterior distribution of the fixed effects
 ```{r, fig.asp=0.5}
 ##Bio12
-data_fixed <- rbind(data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio1$index.1), alr = "alr(GC1/GC4)", 
+data_fixed <- rbind(data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio1$index.1), alr = "alr.gc1", 
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio1$index.2), alr = "alr(GC2/GC4)",
+                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio1$index.2), alr = "alr.gc2",
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio1$index.3), alr = "alr(GC3/GC4)",
+                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio1$index.3), alr = "alr.gc3",
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio12$index.1), alr = "alr(GC1/GC4)",
+                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio12$index.1), alr = "alr.gc1",
                                var = "BIO12"),
-                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio12$index.2), alr = "alr(GC2/GC4)",
+                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio12$index.2), alr = "alr.gc2",
                                var = "BIO12"),
-                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio12$index.3), alr = "alr(GC3/GC4)",
+                    data.frame(inla.smarginal(model.typeIV$marginals.random$id.sc_bio12$index.3), alr = "alr.gc3",
                                var = "BIO12"))
 p_fixed <- ggplot() +
   geom_line(data = data_fixed, aes(x = x, y = y, col = var, linetype = var), size = 0.9) +
@@ -1020,7 +1025,6 @@ model.typeV <- inla(formula.typeV,
                    control.predictor = list(A = inla.stack.A(stk.est), 
                                             compute = TRUE),
                    control.family = list_prior,   
-                   inla.mode = "experimental" , 
                    verbose = FALSE)
 
 ```
@@ -1180,7 +1184,6 @@ model.typeVI <- inla(formula.typeVI,
                    control.predictor = list(A = inla.stack.A(stk.est), 
                                             compute = TRUE),
                    control.family = list_prior,  
-                   inla.mode = "experimental" , 
                    verbose = FALSE)
 
 model.typeVI <- inla.rerun(model.typeVI)
@@ -1194,17 +1197,17 @@ summary(model.typeVI)
   ### ----- 7.1. Posterior distributions of fixed effects and hyperpars --- ####
 ### ------- 7.1.1. Fixed effects --- ####
 ##Bio12
-data_fixed <- rbind(data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio1$index.1), alr = "alr(GC1/GC4)", 
+data_fixed <- rbind(data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio1$index.1), alr = "alr.gc1", 
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio1$index.2), alr = "alr(GC2/GC4)",
+                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio1$index.2), alr = "alr.gc2",
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio1$index.3), alr = "alr(GC3/GC4)",
+                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio1$index.3), alr = "alr.gc3",
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio12$index.1), alr = "alr(GC1/GC4)",
+                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio12$index.1), alr = "alr.gc1",
                                var = "BIO12"),
-                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio12$index.2), alr = "alr(GC2/GC4)",
+                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio12$index.2), alr = "alr.gc2",
                                var = "BIO12"),
-                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio12$index.3), alr = "alr(GC3/GC4)",
+                    data.frame(inla.smarginal(model.typeVI$marginals.random$id.sc_bio12$index.3), alr = "alr.gc3",
                                var = "BIO12"))
 p_fixed <- ggplot() +
   geom_line(data = data_fixed, aes(x = x, y = y, col = var, linetype = var), size = 0.9) +
@@ -1321,7 +1324,6 @@ model.typeVII <- inla(formula.typeVII,
                    control.predictor = list(A = inla.stack.A(stk.est), 
                                             compute = TRUE),
                    control.family = list_prior,   
-                   inla.mode = "experimental" , 
                    verbose = FALSE)
 
 ```
@@ -1450,7 +1452,6 @@ model.typeVIII <- inla(formula.typeVIII,
                    control.predictor = list(A = inla.stack.A(stk.est), 
                                             compute = TRUE),
                    control.family = list_prior,   
-                   inla.mode = "experimental" , 
                    verbose = FALSE)
 
 ```
@@ -1460,17 +1461,17 @@ model.typeVIII <- inla(formula.typeVIII,
   ### ----- 7.1. Posterior distributions of fixed effects and hyperpars --- ####
 ### ------- 7.1.1. Fixed effects --- ####
 ##Bio12
-data_fixed <- rbind(data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio1$index.1), alr = "alr(GC1/GC4)", 
+data_fixed <- rbind(data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio1$index.1), alr = "alr.gc1", 
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio1$index.2), alr = "alr(GC2/GC4)",
+                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio1$index.2), alr = "alr.gc2",
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio1$index.3), alr = "alr(GC3/GC4)",
+                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio1$index.3), alr = "alr.gc3",
                                var = "BIO1"),
-                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio12$index.1), alr = "alr(GC1/GC4)",
+                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio12$index.1), alr = "alr.gc1",
                                var = "BIO12"),
-                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio12$index.2), alr = "alr(GC2/GC4)",
+                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio12$index.2), alr = "alr.gc2",
                                var = "BIO12"),
-                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio12$index.3), alr = "alr(GC3/GC4)",
+                    data.frame(inla.smarginal(model.typeVIII$marginals.random$id.sc_bio12$index.3), alr = "alr.gc3",
                                var = "BIO12"))
 p_fixed <- ggplot() +
   geom_line(data = data_fixed, aes(x = x, y = y, col = var, linetype = var), size = 0.9) +
@@ -1496,9 +1497,9 @@ inla.pmarginal(0, model.typeVIII$marginals.random$id.sc_bio12$index.3)
 1-exp(model.typeVIII$summary.random$id.sc_bio12$mean)
 
 
-#pdf("fixed_arabidopsis.pdf", width = 9, height = 3)
+pdf("fixed_arabidopsis.pdf", width = 9, height = 3)
 p_fixed
-#dev.off()
+dev.off()
 
 ```
 
@@ -1554,19 +1555,21 @@ hyper.df <- lapply(1:length(hyper),
 hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c("sigma2.1", "sigma2.2", "sigma2.3",
                                      "gamma", "phi", "sigma.sp"))
-                          # labels = c("sigma^2[1]", "sigma^2[2]", "sigma^2[3]",
-                          #            "eval(parse(text = expression(gamma)))", "phi", "sigma.sp"))
+hyper.df$name1 <- ordered(hyper.df$name1,
+                          levels = c("sigma2.1", "sigma2.2", "sigma2.3", "gamma", "phi", "sigma.sp"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "sigma[3]^2", "gamma", "phi", "sigma[w]"))
 
 p.hyper <- ggplot(hyper.df) +
   geom_line(aes(x = x, y = y)) +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free",
+             labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
 
-#pdf("hyperpars.pdf", width = 7, height = 4)
+pdf("hyperpars.pdf", width = 7, height = 4)
 print(p.hyper)
-#dev.off()
+dev.off()
 ```
 
 
@@ -1592,7 +1595,7 @@ names(model_list) <- paste0("type", c("I", "II", "III", "IV", "V", "VI", "VII", 
 
 ## Computing measures of this model
 measures <- lapply(model_list, function(mod1){
-  xx <- inla.posterior.sample(1000, mod1)
+  xx <- inla.posterior.sample(1000, mod1, seed = inla.seed)
   inf <- mclapply(xx, INLAcomp::extract_lp_sigma)
   
   #DIC

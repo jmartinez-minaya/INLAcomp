@@ -346,10 +346,8 @@ data_fixed <- rbind(data.frame(inla.smarginal(model.typeII$marginals.random$id.x
 
 p_fixed <- ggplot() +
   geom_line(data = data_fixed, aes(x = x, y = y), size = 0.9) +
-  #ggtitle("Effect of the covariate bio12") +
   theme_bw() +
   geom_vline(data = data_fixed, aes(xintercept = real), col = "red4") +
- # scale_color_manual(values=c("#E75F00", "#56B4E9"))+
   theme(legend.position = "bottom") +
   facet_wrap(~param + alr, 
              ncol = D-1, 
