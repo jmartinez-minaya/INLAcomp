@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 rm(list=ls())
 set.seed(201803)
 inla.seed = sample.int(n=1E6, size=1)
-options(width=70, digits=3)
+options(width=70, digits=7)
 
 ``` 
 
@@ -45,6 +45,7 @@ library(dplyr)
 library(viridis)
 library(INLA)
 library(raster)
+library(parallel)
 ```
 # Functions for plotting
 ```{r}
@@ -154,15 +155,11 @@ plot_raster <- function(rast, cat, sc = FALSE, col1 = "G", ymin = 0, ymax = 1)
   {
     
     gc1_pred <- gc1_pred +
-      ggsn::scalebar(sp_eus2, location = "bottomright",
-                     dist = 200, transform = FALSE,
-                     st.size = 3, st.dist = 0.05, height=0.03,
-                     dist_unit = "km") 
-    #ggsn::north(sp_eus2, location = "topright", scale = 0.2,
-    #            symbol = 4)
-    #ggsn::north2(sp_eus2, x = 0.65, y = 0.9, scale = 0.1, symbol = 1)
-    # 
-    
+  annotation_scale(location = "br", width_hint = 0.3, size = 4) +
+  annotation_north_arrow(location = "br", which_north = "true", 
+                         pad_x = unit(0.0, "in"), pad_y = unit(0.2, "in"),
+                         style = north_arrow_fancy_orienteering)
+
   }
   gc1_pred
   
@@ -249,7 +246,7 @@ p1 <- ggplot(data_plot) +
                  y = y,
                  #size = value,
                  color = value),
-             alpha = 0.8, size = 3) +
+             alpha = 0.8, size = 2) +
   coord_fixed(ratio = 1) +
   facet_wrap(~ name, ncol = 4) +
   theme_bw() +
@@ -268,7 +265,9 @@ p1 <- ggplot(data_plot) +
   ylab("") +
   scale_color_viridis(option="magma", direction = -1, limits = c(0, 1),
                       name = "") 
+#pdf("arabidopsis_des.pdf", width = 12, height = 4)
 print(p1)
+#dev.off()
 ```
 
 ## `alr` transformation
@@ -324,7 +323,7 @@ p2 <- ggplot(data_plot_alr) +
                  y = y,
                  #size = value,
                  color = value),
-             alpha = 0.8, size = 3) +
+             alpha = 0.8, size = 2) +
   coord_fixed(ratio = 1) +
   facet_wrap(~ name) +
   theme_bw() +
@@ -343,8 +342,9 @@ p2 <- ggplot(data_plot_alr) +
   ylab("") +
   scale_color_viridis(option="magma", direction = -1,
                       name = "") 
-
+#pdf("arabidopsis_des_alr.pdf", width = 10, height = 4)
 print(p2)
+#dev.off()
 ```
 
 # Preparing the data for fitting {.tabset}
@@ -606,9 +606,13 @@ hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c("sigma2.1", "sigma2.2", "sigma2.3",
                                      "gamma"))
 
+hyper.df$name1 <- ordered(hyper.df$name1,
+                          levels = c("sigma2.1", "sigma2.2", "sigma2.3", "gamma"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "sigma[3]^2", "gamma"))
+
 p.hyper <- ggplot(hyper.df) +
   geom_line(aes(x = x, y = y)) +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free",              labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
@@ -711,9 +715,13 @@ hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c("sigma2.1", "sigma2.2", "sigma2.3",
                                      "gamma", "phi", "sigma.sp"))
 
+hyper.df$name1 <- ordered(hyper.df$name1,
+                          levels = c("sigma2.1", "sigma2.2", "sigma2.3", "gamma", "phi", "sigma.sp"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "sigma[3]^2", "gamma", "phi", "sigma[w]"))
+
 p.hyper <- ggplot(hyper.df) +
   geom_line(aes(x = x, y = y)) +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free",              labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
@@ -829,12 +837,16 @@ hyper.df <- lapply(1:length(hyper),
 hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c("sigma2.1", "sigma2.2", "sigma2.3",
                                      "gamma", "phi", "sigma.sp"))
-                          # labels = c("sigma^2[1]", "sigma^2[2]", "sigma^2[3]",
-                          #            "eval(parse(text = expression(gamma)))", "phi", "sigma.sp"))
+
+
+hyper.df$name1 <- ordered(hyper.df$name1,
+                          levels = c("sigma2.1", "sigma2.2", "sigma2.3", "gamma", "phi", "sigma.sp"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "sigma[3]^2", "gamma", "phi", "sigma[w]"))
+
 
 p.hyper <- ggplot(hyper.df) +
   geom_line(aes(x = x, y = y)) +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free",              labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
@@ -978,11 +990,13 @@ hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c("sigma2.1", "sigma2.2", "sigma2.3",
                                      "gamma", "phi", "sigma.sp"))
 
-
+hyper.df$name1 <- ordered(hyper.df$name1,
+                          levels = c("sigma2.1", "sigma2.2", "sigma2.3", "gamma", "phi", "sigma.sp"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "sigma[3]^2", "gamma", "phi", "sigma[w]"))
 
 p.hyper <- ggplot(hyper.df) +
   geom_line(aes(x = x, y = y)) +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free",              labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
@@ -1110,10 +1124,14 @@ hyper.df <- lapply(1:length(hyper),
 hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c("sigma2.1", "sigma2.2", "sigma2.3",
                                      "gamma", "phi", "sigma.sp", "alpha1", "alpha2"))
+
+hyper.df$name1 <- ordered(hyper.df$name1,
+                          levels = c("sigma2.1", "sigma2.2", "sigma2.3", "gamma", "phi", "sigma.sp", "alpha1", "alpha2"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "sigma[3]^2", "gamma", "phi", "sigma[w]", "alpha[1]", "alpha[2]"))
                           
 p.hyper <- ggplot(hyper.df) +
   geom_line(aes(x = x, y = y)) +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free",              labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
@@ -1284,9 +1302,14 @@ hyper.df <- lapply(1:length(hyper),
 hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c("sigma2.1", "sigma2.2", "sigma2.3",
                                      "gamma", "phi", "sigma.sp", "alpha1", "alpha2"))
+
+hyper.df$name1 <- ordered(hyper.df$name1,
+                          levels = c("sigma2.1", "sigma2.2", "sigma2.3", "gamma", "phi", "sigma.sp", "alpha1", "alpha2"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "sigma[3]^2", "gamma", "phi", "sigma[w]", "alpha[1]", "alpha[2]"))
+
 p.hyper <- ggplot(hyper.df) +
   geom_line(aes(x = x, y = y)) +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free",              labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
@@ -1399,12 +1422,13 @@ hyper.df <- lapply(1:length(hyper),
 hyper.df$name1 <- ordered(hyper.df$name1,
                           levels = c("sigma2.1", "sigma2.2", "sigma2.3",
                                      "gamma", "phi", "sigma.sp"))
-                          # labels = c("sigma^2[1]", "sigma^2[2]", "sigma^2[3]",
-                          #            "eval(parse(text = expression(gamma)))", "phi", "sigma.sp"))
+hyper.df$name1 <- ordered(hyper.df$name1,
+                          levels = c("sigma2.1", "sigma2.2", "sigma2.3", "gamma", "phi", "sigma.sp"),
+                          labels = c("sigma[1]^2", "sigma[2]^2", "sigma[3]^2", "gamma", "phi", "sigma[w]"))
 
 p.hyper <- ggplot(hyper.df) +
   geom_line(aes(x = x, y = y)) +
-  facet_wrap(~ name1, scales = "free") +
+  facet_wrap(~ name1, scales = "free",              labeller = label_parsed) +
   theme_bw() +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
@@ -1497,9 +1521,9 @@ inla.pmarginal(0, model.typeVIII$marginals.random$id.sc_bio12$index.3)
 1-exp(model.typeVIII$summary.random$id.sc_bio12$mean)
 
 
-pdf("fixed_arabidopsis.pdf", width = 9, height = 3)
+#pdf("fixed_arabidopsis.pdf", width = 9, height = 3)
 p_fixed
-dev.off()
+#dev.off()
 
 ```
 
@@ -1567,9 +1591,9 @@ p.hyper <- ggplot(hyper.df) +
   xlab(expression(theta)) +
   ylab(expression(p(theta*'|'*y)))
 
-pdf("hyperpars.pdf", width = 7, height = 4)
+#pdf("hyperpars.pdf", width = 7, height = 4)
 print(p.hyper)
-dev.off()
+#dev.off()
 ```
 
 
@@ -1625,15 +1649,18 @@ data.frame(DIC = dic.mod1, WAIC = waic.mod1, LCPO = LCPO)
 
 measures <-  as.data.frame(do.call(rbind, measures))
 
-measures
+measures %>%
+  dplyr::select(DIC.dic, WAIC.waic, LCPO) %>%
+  round(., 3) %>%
+  xtable::xtable(., digits = 3)
 ```
 
 
 
 
-<!-- # Predicting with the best model based on WAIC (Type VII) -->
+<!-- # Predicting with the best model based on WAIC (Type VIII) -->
 
-<!-- ## Preparing dataset for predictions  -->
+<!-- ## Preparing dataset for predictions -->
 <!-- ```{r} -->
 
 <!-- sim <- 1000 -->
@@ -1658,9 +1685,9 @@ measures
 
 
 <!-- #Defining the projection matrix -->
-<!-- A.pred <- inla.spde.make.A(mesh,  -->
-<!--                            loc = do.call("rbind",  -->
-<!--                                          replicate(k-1, locs_pred,  -->
+<!-- A.pred <- inla.spde.make.A(mesh, -->
+<!--                            loc = do.call("rbind", -->
+<!--                                          replicate(k-1, locs_pred, -->
 <!--                                                    simplify = FALSE)), -->
 <!--                            repl = rep(1:(k-1), rep(n.pred, k-1))) -->
 
@@ -1669,12 +1696,12 @@ measures
 <!-- id.cat_pred <- rep(1:(k-1), rep(n.pred, k-1)) -->
 
 <!-- #Index for covariates -->
-<!-- variables_pred <- c("intercept", data_pred %>%  -->
-<!--                       dplyr::select(starts_with("sc_")) %>%  -->
+<!-- variables_pred <- c("intercept", data_pred %>% -->
+<!--                       dplyr::select(starts_with("sc_")) %>% -->
 <!--                       colnames(.)) -->
 
 <!-- id.names_pred <- paste0("id.", variables_pred) -->
-<!-- id.variables_pred <- rep(id.cat_pred, length(variables_pred)) %>%  -->
+<!-- id.variables_pred <- rep(id.cat_pred, length(variables_pred)) %>% -->
 <!--   matrix(., ncol = length(variables_pred), byrow = FALSE) -->
 <!-- colnames(id.variables_pred) <- id.names_pred -->
 
@@ -1687,7 +1714,7 @@ measures
 <!-- ```{r} -->
 <!-- cat("\n ----------------------------------------------- \n") -->
 <!-- cat("Creating inla.stack \n") -->
-<!-- stk.pred <- inla.stack(data    = list(resp = matrix(NA, ncol = k-1,  -->
+<!-- stk.pred <- inla.stack(data    = list(resp = matrix(NA, ncol = k-1, -->
 <!--                                                     nrow = n.pred*(k-1))), -->
 <!--                        A       = list(A.pred, 1, A.pred2), -->
 <!--                        effects = list(c(iset), -->
@@ -1705,22 +1732,21 @@ measures
 
 
 <!-- ## Prediction -->
-<!-- ```{r, eval=FALSE} -->
+<!-- ```{r, eval=TRUE} -->
 <!-- cat("\n ----------------------------------------------- \n") -->
 <!-- cat("Predicting \n") -->
-<!-- mod.pred <- inla(formula.typeVIII,  -->
+<!-- mod.pred <- inla(formula.typeVIII, -->
 <!--                  family         = rep("gaussian", k - 1), -->
-<!--                  data              = inla.stack.data(stk),  -->
+<!--                  data              = inla.stack.data(stk), -->
 <!--                  control.compute   = list(config = TRUE, cpo = TRUE, dic = TRUE, waic = TRUE), -->
 <!--                  control.predictor = list(A = inla.stack.A(stk), compute = TRUE, link = 1), -->
-<!--                  control.mode      = list(theta = model.typeVIII$mode$theta, restart = TRUE),  -->
-<!--                  control.family = list_prior,    -->
+<!--                  control.mode      = list(theta = model.typeVIII$mode$theta, restart = TRUE), -->
+<!--                  control.family = list_prior, -->
 <!--                  #control.fixed     = list(mean=0, prec=10^(-4), mean.intercept=0, prec.intercept=10^(-4)), -->
 <!--                  # control.results   = list(return.marginals.random = FALSE, -->
 <!--                  #                          return.marginals.predictor  = FALSE), #avoiding marginals -->
 <!--                  num.threads       = 2, -->
-<!--                  inla.mode = "experimental" ,  -->
-<!--                  verbose           = TRUE) -->
+<!--                  verbose           = FALSE) -->
 
 <!-- mod.pred$summary.random$id.z -->
 
@@ -1731,7 +1757,7 @@ measures
 
 <!-- cat("-----------------------------------------------") -->
 <!-- cat("Posterior sample \n") -->
-<!-- post_sim_pred <- inla.posterior.sample(n = sim, result = mod.pred) -->
+<!-- post_sim_pred <- inla.posterior.sample(n = sim, result = mod.pred, seed = inla.seed) -->
 <!-- post_sim_predictor <- inla.posterior.sample.eval(fun = function(...){ -->
 <!--   APredictor}, post_sim_pred, return.matrix = TRUE) -->
 <!-- post_sim_idz <- inla.posterior.sample.eval(fun = function(...){ -->
@@ -1742,7 +1768,7 @@ measures
 <!-- ind.idz <- inla.stack.index(stk, 'est')$data #This is the shared random effect -->
 <!-- ind.idz <- ind.idz[1:(length(ind.idz)/(k-1))] -->
 
-<!-- post_sim_predictor[ind.pred, ] <- post_sim_predictor[ind.pred, ]-  -->
+<!-- post_sim_predictor[ind.pred, ] <- post_sim_predictor[ind.pred, ]- -->
 <!--   kronecker(rep(1, k-1), post_sim_idz[-ind.idz,]) -->
 
 
@@ -1760,7 +1786,7 @@ measures
 <!-- #pred_simplex_summary <- t(apply(post_sim_pred_simplex, 1, function(x){c(sd(x), quantile(x, probs = c(0.025, 0.5, 0.975)))})) -->
 <!-- pred_alr_summary <- t(apply(post_sim_pred_alr, 1, function(x){c(sd(x), mean(x))})) -->
 <!-- colnames(pred_alr_summary) <- c("sd", "mean") -->
-<!-- pred_alr_summary <- data.frame(pred_alr_summary,  -->
+<!-- pred_alr_summary <- data.frame(pred_alr_summary, -->
 <!--                                result1 = rep(names_alr, n.pred)) -->
 
 
@@ -1794,26 +1820,32 @@ measures
 <!-- ``` -->
 
 <!-- ## Plotting predictions -->
-<!-- ```{r, eval = FALSE} -->
+<!-- ```{r, eval = TRUE} -->
+
 <!-- ### --------- 8.6.1.1. Plotting predictions --- #### -->
 <!-- pred_plot_mean_alr <- lapply(names_alr, -->
 <!--                              plot_raster, rast = pred_mean_alr, -->
 <!--                              ymin = -3.3, ymax = 3.75) -->
 
 <!-- pred_plot_sd_alr <- lapply(names_alr, -->
-<!--                            plot_raster, rast = pred_sd_alr,  -->
+<!--                            plot_raster, rast = pred_sd_alr, -->
 <!--                            col1 = "F", ymin = 0.0, ymax = 1.25) -->
 
-<!-- pred_plot_sd_alr[[3]] <- plot_raster(rast = pred_sd_alr,  -->
-<!--                                      col1 = "F", ymin = 0, ymax = 1.25,  -->
+<!-- pred_plot_sd_alr[[3]] <- plot_raster(rast = pred_sd_alr, -->
+<!--                                      col1 = "F", ymin = 0, ymax = 1.25, -->
 <!--                                      sc = TRUE, cat = "alr.gc3") -->
+
+
+
+
+
 
 <!-- mylegend_alr <- g_legend(pred_plot_mean_alr[[1]]) -->
 <!-- mylegend2_alr <- g_legend(pred_plot_sd_alr[[1]]) -->
 
 
 <!-- #pdf(paste0("arabidop_prediction_alr","_", "bio1_bio12", ".pdf"), width = 10, height = 7) -->
-<!-- grid.arrange(arrangeGrob(pred_plot_mean_alr[[1]] + theme(legend.position = "none"), -->
+<!-- a1 <- grid.arrange(arrangeGrob(pred_plot_mean_alr[[1]] + theme(legend.position = "none"), -->
 <!--                          pred_plot_mean_alr[[2]] + theme(legend.position = "none"), -->
 <!--                          pred_plot_mean_alr[[3]] + theme(legend.position = "none"), -->
 <!--                          nrow = 1), -->
@@ -1824,15 +1856,16 @@ measures
 <!--                          nrow = 1), -->
 <!--              mylegend2_alr, -->
 <!--              nrow = 4, ncol = 1, heights = c(4, 1, 4, 1)) -->
+<!-- print(a1) -->
 <!-- #dev.off() -->
 
 <!-- ``` -->
 
 <!-- ```{r image-ref-for-in-text, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Some cool caption', out.width='0.75\\linewidth', fig.pos='H'} -->
-<!-- knitr::include_graphics("arabidop_prediction_alr_bio1_bio12.png") -->
+<!-- #knitr::include_graphics("arabidop_prediction_alr_bio1_bio12.png") -->
 <!-- ``` -->
 <!-- ## Predictions in the simplex -->
-<!-- ```{r, eval = FALSE} -->
+<!-- ```{r, eval = TRUE} -->
 <!-- ### ------- 8.6.2. Prediction in the simplex --- ##### -->
 <!-- apply(post_sim_predictor[ind.pred,], 2, function(x){ -->
 <!--   alr_pred <- matrix(x, ncol = k-1) -->
@@ -1848,7 +1881,7 @@ measures
 
 
 <!-- colnames(pred_simplex_summary) <- c("sd", "mean") -->
-<!-- pred_simplex_summary <- data.frame(pred_simplex_summary,  -->
+<!-- pred_simplex_summary <- data.frame(pred_simplex_summary, -->
 <!--                                    result1 = rep(result_order, n.pred)) -->
 
 <!-- raster_predictions <- raster_predict -->
@@ -1884,7 +1917,7 @@ measures
 <!--                          plot_raster, rast = pred_mean) -->
 
 <!-- pred_plot_sd <- lapply(c(paste0("gc", 1:k)), -->
-<!--                        plot_raster, rast = pred_sd,  -->
+<!--                        plot_raster, rast = pred_sd, -->
 <!--                        col1 = "F", ymax = 0.25) -->
 <!-- pred_plot_sd[[4]] <- plot_raster(rast = pred_sd, col1 = "F", ymax = 0.4, sc = TRUE, cat = "gc4") -->
 
@@ -1893,9 +1926,9 @@ measures
 <!-- mylegend2 <- g_legend(pred_plot_sd[[1]]) -->
 
 
-<!-- # pdf(paste0("arabidop_prediction","_", "bio1_bio12", ".pdf"),  -->
-<!-- #       width = 12, height = 7) -->
-<!-- grid.arrange(arrangeGrob(pred_plot_mean[[1]] + theme(legend.position = "none"), -->
+<!-- # pdf(paste0("arabidop_prediction","_", "bio1_bio12", ".pdf"), -->
+<!-- #        width = 12, height = 7) -->
+<!-- b <- grid.arrange(arrangeGrob(pred_plot_mean[[1]] + theme(legend.position = "none"), -->
 <!--                          pred_plot_mean[[2]] + theme(legend.position = "none"), -->
 <!--                          pred_plot_mean[[3]] + theme(legend.position = "none"), -->
 <!--                          pred_plot_mean[[4]] + theme(legend.position = "none"), -->
@@ -1908,6 +1941,7 @@ measures
 <!--                          nrow = 1), -->
 <!--              mylegend2, -->
 <!--              nrow = 4, ncol = 1, heights = c(4, 1, 4, 1)) -->
+<!-- print(b) -->
 <!-- #dev.off() -->
 <!-- #getwd() -->
 <!-- ``` -->

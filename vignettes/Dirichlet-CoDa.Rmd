@@ -345,7 +345,7 @@ data_fixed <- rbind(data.frame(inla.smarginal(model.typeII$marginals.random$id.x
 
 
 p_fixed <- ggplot() +
-  geom_line(data = data_fixed, aes(x = x, y = y), size = 0.9) +
+  geom_line(data = data_fixed, aes(x = x, y = y)) +
   theme_bw() +
   geom_vline(data = data_fixed, aes(xintercept = real), col = "red4") +
   theme(legend.position = "bottom") +
@@ -357,9 +357,9 @@ p_fixed <- ggplot() +
   ylab(expression(p(beta^(d) *'|'* theta))) +
   theme(legend.title = element_blank())
 
-#pdf("posterior_fixed.pdf", width = 6, height = 5)
+pdf("posterior_fixed.pdf", width = 6, height = 5)
 p_fixed
-#dev.off()
+dev.off()
 ```
 
 
