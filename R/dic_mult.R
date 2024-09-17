@@ -1,3 +1,5 @@
+utils::globalVariables(c(".", "var"))
+
 #' Computing multivariate Gaussian density
 #'
 #' `dmnorm` computes the multivariate joint density Gaussian distribution
