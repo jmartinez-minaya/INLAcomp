@@ -51,36 +51,4 @@ jobs:
   deploy:
     needs: R-CMD-check
     runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
-
-      - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
-
-      - name: Set site library path
-        run: echo "R_LIBS_USER=${HOME}/R/library" >> $GITHUB_ENV
-
-      - name: Create R library directory
-        run: mkdir -p "${HOME}/R/library"
-
-      - name: Install pak
-        run: R -e "install.packages('pak', repos = 'https://cran.rstudio.com')"
-
-      - name: Install Suggested Dependencies
-        run: R -e "pak::pkg_install(c('pkgdown', 'remotes'))"
-
-      - name: Install INLAcomp Locally
-        run: R -e "remotes::install_local(upgrade = 'never')"
-
-      - name: Build pkgdown site
-        run: Rscript -e 'pkgdown::build_site()'
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+   
