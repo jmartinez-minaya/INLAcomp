@@ -19,13 +19,10 @@ jobs:
         run: mkdir -p "${HOME}/R/library"
 
       - name: Install pak
-        run: R -e "install.packages('pak')"
-
-      - name: Install INLA
-        run: R -e "install.packages('INLA', repos = c(getOption('repos'), INLA = 'https://inla.r-inla-download.org/R/stable'))"
+        run: R -e "install.packages('pak', repos = 'https://cran.rstudio.com')"
 
       - name: Install Dependencies
-        run: R -e "pak::pkg_install(c('INLA', 'sessioninfo', 'pkgdown'))"
+        run: R -e "pak::pkg_install(c('https://inla.r-inla-download.org/R/stable', 'sessioninfo', 'pkgdown'))"
 
       - name: Print session info
         run: R -e "sessionInfo()"
