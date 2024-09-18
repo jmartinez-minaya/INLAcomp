@@ -6,3 +6,5 @@ INLAcomp.Rproj
 .DS_Store
 /doc/
 /Meta/
+docs/
+.Rhistory
