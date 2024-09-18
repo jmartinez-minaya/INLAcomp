@@ -71,7 +71,10 @@ jobs:
         run: R -e "install.packages('pak', repos = 'https://cran.rstudio.com')"
 
       - name: Install Suggested Dependencies
-        run: R -e "pak::pkg_install(c('pkgdown'))"
+        run: R -e "pak::pkg_install(c('pkgdown', 'remotes'))"
+
+      - name: Install INLAcomp Locally
+        run: R -e "remotes::install_local(upgrade = 'never')"
 
       - name: Build pkgdown site
         run: Rscript -e 'pkgdown::build_site()'
