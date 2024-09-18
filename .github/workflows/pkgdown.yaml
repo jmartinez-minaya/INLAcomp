@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           R -e 'install.packages("remotes")'
-          R -e 'remotes::install_github("hrue/r-inla")'
+          R -e 'install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/testing"), dep=TRUE)'
           R -e 'install.packages(c("sessioninfo", "pkgdown"))'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
