@@ -1,5 +1,5 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+name: pkgdown.yaml
+
 on:
   push:
     branches: [main, master]
@@ -8,8 +8,6 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-
-name: pkgdown.yaml
 
 permissions: read-all
 
@@ -32,19 +30,21 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Install INLA
+        run: |
+          R -e 'install.packages("INLA", repos = c(getOption("repos"), INLA = "https://inla.r-inla-download.org/R/stable"), dep = TRUE)'
+
       - name: Install dependencies
         run: |
           R -e 'install.packages("remotes")'
-          R -e 'install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/testing"), dep=TRUE)'
           R -e 'install.packages(c("sessioninfo", "pkgdown"))'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::pkgdown, local::.
-          needs: website
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        run: R -e 'pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)'
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
