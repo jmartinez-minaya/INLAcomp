@@ -1,9 +1,0 @@
-pandoc: 3.1.11
-pkgdown: 2.1.1
-pkgdown_sha: ~
-articles:
-  Dirichlet-CoDa: Dirichlet-CoDa.html
-last_built: 2024-09-18T12:21Z
-urls:
-  reference: https://jmartinez-minaya.github.io/INLAcomp/reference
-  article: https://jmartinez-minaya.github.io/INLAcomp/articles
