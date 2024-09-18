@@ -12,6 +12,9 @@ jobs:
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
 
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
       - name: Set site library path
         run: echo "R_LIBS_USER=${HOME}/R/library" >> $GITHUB_ENV
 
