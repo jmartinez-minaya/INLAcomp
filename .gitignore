@@ -1,4 +1,9 @@
 inst/doc
 .Rproj.user/
 INLAcomp.Rproj
-docs
+.Rprofile
+.httr-oauth
+.DS_Store
+docs/
+/doc/
+/Meta/
