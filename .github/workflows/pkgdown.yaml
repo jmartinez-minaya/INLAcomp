@@ -24,11 +24,11 @@ jobs:
       - name: Install pak
         run: R -e "install.packages('pak', repos = 'https://cran.rstudio.com')"
 
-      - name: Install INLA
+      - name: Install INLA and dependencies
         run: R -e "install.packages('INLA', repos = c(getOption('repos'), INLA = 'https://inla.r-inla-download.org/R/testing'), dep = TRUE)"
 
-      - name: Install Dependencies
-        run: R -e "pak::pkg_install(c('sessioninfo', 'pkgdown'))"
+      - name: Install Suggested Dependencies
+        run: R -e "pak::pkg_install(c('sessioninfo', 'pkgdown', 'compositions'))"
 
       - name: Print session info
         run: R -e "sessionInfo()"
