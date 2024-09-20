@@ -5,7 +5,6 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/jmartinez-minaya/INLAcomp/tree/main/.github/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jmartinez-minaya/INLAcomp/tree/main/.github/workflows/R-CMD-check.yaml)
 [![R-CMD-check](https://github.com/jmartinez-minaya/INLAcomp/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jmartinez-minaya/INLAcomp/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
