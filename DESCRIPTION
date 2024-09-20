@@ -1,7 +1,7 @@
 Package: INLAcomp
 Type: Package
 Title: Logistic-normal Dirichlet Model for Compositional Data
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
   person("Joaquín Martínez-Minaya", email = "jomarminaya@gmail.com", 
          role = c("aut", "cre", "ctb"),
@@ -13,7 +13,6 @@ Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
     dplyr,
     Matrix,
-    MASS,
     stringr
 Encoding: UTF-8
 LazyData: true
