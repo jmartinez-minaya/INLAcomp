@@ -6,6 +6,8 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/jmartinez-minaya/INLAcomp/tree/main/.github/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jmartinez-minaya/INLAcomp/tree/main/.github/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/jmartinez-minaya/INLAcomp/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jmartinez-minaya/INLAcomp/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
 
 The goal of **INLAcomp** is to analyze compositional data with Logistic
 Normal distribution regression with Dirichlet residuals (LNDM) using the

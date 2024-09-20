@@ -27,3 +27,5 @@ Suggests:
     ggplot2,
     sn
 URL: https://jmartinez-minaya.github.io/INLAcomp/
+VignetteBuilder: knitr
+
