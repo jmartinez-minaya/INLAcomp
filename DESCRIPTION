@@ -24,6 +24,12 @@ Suggests:
     compositions,
     tidyr,
     ggplot2,
-    sn
+    sn,
+    viridis,
+    raster,
+    inlabru,
+    parallel,
+    gridExtra,
+    xtable
 URL: https://jmartinez-minaya.github.io/INLAcomp/
 VignetteBuilder: knitr

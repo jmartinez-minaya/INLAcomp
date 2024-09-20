@@ -5,7 +5,7 @@ author: Joaquín Martínez-Minaya --- jmarmin@eio.upv.es
 date: '`r Sys.time()`'
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Fitting CoDa using the Logistic Gaussian distribution with Dirichlet covariance structure}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: coda_bib.bib  
