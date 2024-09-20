@@ -1,95 +1,40 @@
-name: R-CMD-check-and-Deploy
-
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
-    branches:
-      - main
+    branches: [main, master]
   pull_request:
-
+    branches: [main, master]
+  release:
+    types: [published]
+  workflow_dispatch:
+name: pkgdown
 jobs:
-  R-CMD-check:
+  pkgdown:
     runs-on: ubuntu-latest
+    # Only restrict concurrency for non-PR jobs
+    concurrency:
+      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
-
-      - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
-
-      - name: Set site library path
-        run: echo "R_LIBS_USER=${HOME}/R/library" >> $GITHUB_ENV
-
-      - name: Cache R libraries
-        uses: actions/cache@v3
+      - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
         with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-r-${{ hashFiles('**/DESCRIPTION') }}
-          restore-keys: |
-            ${{ runner.os }}-r-
-
-      - name: Create R library directory
-        run: mkdir -p "${HOME}/R/library"
-
-      - name: Install pak
-        run: R -e "install.packages('pak', repos = 'https://cran.rstudio.com')"
-
-      - name: Install fmesher
-        run: R -e "install.packages('fmesher', repos = 'https://inla.r-inla-download.org/R/stable')"
-
-      - name: Install INLA and dependencies
-        run: R -e "install.packages('INLA', repos = c(getOption('repos'), INLA = 'https://inla.r-inla-download.org/R/testing'), dep = TRUE)"
-
-      - name: Install Suggested Dependencies
-        run: R -e "pak::pkg_install(c('sessioninfo', 'pkgdown', 'compositions'))"
-
-      - name: Print session info
-        run: R -e "sessionInfo()"
-
-      - name: Run R CMD check
-        run: R CMD check . --no-manual
-
-  deploy:
-    needs: R-CMD-check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
-
-      - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
-
-      - name: Set site library path
-        run: echo "R_LIBS_USER=${HOME}/R/library" >> $GITHUB_ENV
-
-      - name: Create R library directory
-        run: mkdir -p "${HOME}/R/library"
-
-      - name: Install pak
-        run: R -e "install.packages('pak', repos = 'https://cran.rstudio.com')"
-
-      - name: Install fmesher
-        run: R -e "install.packages('fmesher', repos = 'https://inla.r-inla-download.org/R/stable')"
-
-      - name: Install INLA and dependencies
-        run: R -e "install.packages('INLA', repos = c(getOption('repos'), INLA = 'https://inla.r-inla-download.org/R/testing'), dep = TRUE)"
-
-      - name: Install Suggested Dependencies
-        run: R -e "pak::pkg_install(c('pkgdown', 'remotes'))"
-
-      - name: Install INLAcomp Locally
-        run: R -e "remotes::install_local(upgrade = 'never')"
-
-      - name: Build pkgdown site
-        run: Rscript -e 'pkgdown::build_site()'
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+          use-public-rspm: true
+	  extra-repositories: "https://inla.r-inla-download.org/R/testing"
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          extra-packages: any::pkgdown, local::.
+          needs: website
+      - name: Build site
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        shell: Rscript {0}
+      - name: Deploy to GitHub pages 🚀
+        if: github.event_name != 'pull_request'
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          clean: false
+          branch: gh-pages
+          folder: docs

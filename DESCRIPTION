@@ -2,10 +2,19 @@ Package: INLAcomp
 Type: Package
 Title: Logistic-normal Dirichlet Model for Compositional Data
 Version: 0.1.0
-Author: Joaquín Martínez-Minaya <jmarmin@eio.upv.es>
-Maintainer: Joaquín Martínez-Minaya <jmarmin@eio.upv.es>
+Authors@R: c(
+  person("Joaquín Martínez-Minaya", email = "jomarminaya@gmail.com", 
+         role = c("aut", "cre"),
+         comment = c(ORCID = "0000-0002-1016-8734"))
+  )
 Description: This package has the necessary functions to compute the DIC and WAIC for LNDMs using R-INLA.
 License: GPL-2
+Additional_repositories: https://inla.r-inla-download.org/R/testing
+Imports: 
+    dplyr,
+    Matrix,
+    MASS,
+    stringr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
@@ -17,11 +26,4 @@ Suggests:
     tidyr,
     ggplot2,
     sn
-VignetteBuilder: knitr
-Additional_repositories: https://inla.r-inla-download.org/R/testing
-Imports: 
-    dplyr,
-    Matrix,
-    MASS,
-    stringr
 URL: https://jmartinez-minaya.github.io/INLAcomp/
