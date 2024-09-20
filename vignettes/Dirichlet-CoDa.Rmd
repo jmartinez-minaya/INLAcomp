@@ -1,7 +1,7 @@
 ---
 title: "Fitting CoDa using the Logistic Gaussian distribution with Dirichlet covariance structure"
 subtitle: "Version 1.0.0"
-author: \normalfont{Joaquín Martínez-Minaya {\small{$\bullet$}} jmarmin@eio.upv.es}
+author: Joaquín Martínez-Minaya --- jmarmin@eio.upv.es
 date: '`r Sys.time()`'
 output: rmarkdown::html_vignette
 vignette: >
