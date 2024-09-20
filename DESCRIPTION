@@ -4,7 +4,7 @@ Title: Logistic-normal Dirichlet Model for Compositional Data
 Version: 0.1.0
 Authors@R: c(
   person("Joaquín Martínez-Minaya", email = "jomarminaya@gmail.com", 
-         role = c("aut", "cre"),
+         role = c("aut", "cre", "ctb"),
          comment = c(ORCID = "0000-0002-1016-8734"))
   )
 Description: This package has the necessary functions to compute the DIC and WAIC for LNDMs using R-INLA.
