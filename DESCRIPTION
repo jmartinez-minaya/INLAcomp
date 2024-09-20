@@ -8,7 +8,7 @@ Authors@R: c(
          comment = c(ORCID = "0000-0002-1016-8734"))
   )
 Description: This package has the necessary functions to compute the DIC and WAIC for LNDMs using R-INLA.
-License: GPL-2
+License: MIT + file LICENSE
 Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
     dplyr,
@@ -28,4 +28,3 @@ Suggests:
     sn
 URL: https://jmartinez-minaya.github.io/INLAcomp/
 VignetteBuilder: knitr
-
