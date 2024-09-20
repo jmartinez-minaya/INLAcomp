@@ -1,6 +1,19 @@
+---
+output: github_document
+---
 
-INLAcomp
-------------
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# INLAcomp
 
 The goal of **INLAcomp** is to analyze compositional data with Logistic Normal distribution regression with Dirichlet residuals (LNDM) using the integrated nested Laplace approximation
 via the [R-INLA package](https://www.r-inla.org/). Method is in [Martinez-Minaya and Rue, 2024](https://link.springer.com/article/10.1007/s11222-024-10427-3).
